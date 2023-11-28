@@ -10,12 +10,62 @@ R = {-1, 0, 1, 0}
 C = {0, 1, 0, -1}
 F = {1, 0, -1}
 
+#map value: 0 = empty 
+#           -1 = wall 
+#           1 = up stair 
+#           2 = down stair 
+#           1X = agents 
+#           2X = targets 
+#           3X = keys 
+#           4X = doors
 
-def input():
-    TODO
+def input(filepath):
+    f = m = n = 0
 
-    #map[f][m][n] for f floors
+    with open(filepath, 'r') as filein:
+        while True:
+            line = filein.readline()
+            if line == '':
+                break
+            if line[0] == '[':
+                f = f + 1
+
+    with open(filepath, 'r') as filein:
+        m = int(filein.read())
+        n = int(filein.read())
+        map = [[[0] * n for i in range(m)] for j in range(f)]
+        
+        for k in range(f):
+            filein.readline()
+            
+            for i in range(m):
+                line = filein.readline()
+                line = line.split(',')
+                for j, s in enumerate(line):
+                    match s:
+                        case '0':
+                            map[k][i][j] = 0
+                        case '-1':
+                            map[k][i][j] = -1
+                        case 'UP':
+                            map[k][i][j] = 1
+                        case 'DO':
+                            map[k][i][j] = 2
+                        case _:
+                            match s[0]:
+                                case 'A':
+                                    map[k][i][j] = 10
+                                case 'T':
+                                    map[k][i][j] = 20
+                                case 'K':
+                                    map[k][i][j] = 30
+                                case 'D':
+                                    map[k][i][j] = 40
+                            map[k][i][j] += int(s[1]) - 1
+
+    # map[f][m][n] for f floors, m rows, n columns
     return map
+
 
 #draw the floor where agent A1 is on
 def output(map, agents_coord): #coord is agents' current position
