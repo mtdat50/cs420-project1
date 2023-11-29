@@ -1,25 +1,25 @@
 from function import *
 from time import sleep
 
-map = input()
+map, agentCoord = input()
 f = len(map)
 m = len(map[0])
 n = len(map[0][0])
 
-#scan thro the map and get the agents coordinate
-agents_coord = []
 
 
-g, agents, targets = convert2Graph(map)
-path = findPath(g, agent_index = agents[0], target_index = targets[0])
+g, vertexType= convert2Graph(map, agentCoord = agentCoord)
+path = findPath(g, agent_index = 1)
 
 
 for step in path:
-    if step < 4:
-        agents_coord[0][1] += R[step]
-        agents_coord[0][2] += C[step]
-    else:
-        agents_coord[0][0] += F[step - 4]
+    agentCoord[0][2] += step[0]
+    agentCoord[0][3] += step[1]
 
-    output(map, agents_coord=agents_coord)
+    if map[agentCoord[0][1]][agentCoord[0][2]][agentCoord[0][3]] == 'UP':
+        agentCoord[0][1] += 1
+    elif map[agentCoord[0][1]][agentCoord[0][2]][agentCoord[0][3]] == 'DO':
+        agentCoord[0][1] -= 1
+
+    output(map, agents_coord = agentCoord)
     sleep(0.5)
