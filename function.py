@@ -91,13 +91,13 @@ def convert2Graph(map, agentCoord):
                     if map[k][i][j] == 'UP':
                         objectCoord.append((k + 1, i, j))
                         objIndexList[(k + 1, i, j)] = len(g)
-                        g[-1].append((len(g), []))
+                        g[-1].append((len(g), [(0, 0)]))
                         g.append([])
                         vertexType.append('0')
                     if map[k][i][j] == 'DO':
                         objectCoord.append((k - 1, i, j))
                         objIndexList[(k - 1, i, j)] = len(g)
-                        g[-1].append((len(g), []))
+                        g[-1].append((len(g), [(0, 0)]))
                         g.append([])
                         vertexType.append('0')
 
