@@ -52,20 +52,20 @@ def input(filepath):
 def output(map, agents_coord): #list of agents' current position, [][1] = floor, [][2] = row, [][3] = column
     TODO
 
+
 def _tracePath(steppingTrack, r, c, sourceR, sourceS):
     path = []
-    i = 0
-    while r != sourceR and c != sourceS:
-        i += 1
+    while r != sourceR or c != sourceS:
         path.append(steppingTrack[r][c])
         step = steppingTrack[r][c]
         r -= step[0]
         c -= step[1]
-
     
     path.reverse()
     return path
 
+
+#convert matrix to graph, vertices are objects on the map, edges are paths between objects
 def convert2Graph(map, agentCoord): 
     g = []
     vertexType = []
@@ -117,6 +117,8 @@ def convert2Graph(map, agentCoord):
             curC = q[0][2]
             q.popleft()
 
+            if map[curF][curR][curC] == '-1':
+                print('-1================')
 
             for i in range(-1, 2):
                 newR = curR + i
@@ -144,19 +146,19 @@ def convert2Graph(map, agentCoord):
                         g[curObjIndex].append((newObjIndex, _tracePath(steppingTrack, newR, newC, obj[1], obj[2])))
     return g, vertexType
 
+
 def _tracePath2(prevEdge, g, agent_index, u, keys):
     path = []
     nodes = [u]
     while u != (agent_index - 1) or keys != 0:
         prevVertex = prevEdge[u][keys][0]
         edgeIndex = prevEdge[u][keys][1]
-        path += (g[prevVertex][edgeIndex][1])
+        path = g[prevVertex][edgeIndex][1] + path
         keys = prevEdge[u][keys][2]
         u = prevVertex
         nodes.append(u)
 
     nodes.reverse()
-    path.reverse()
     return path, nodes
 
 
@@ -177,12 +179,10 @@ def findPath(g, vertexType, agent_index): #g = adjacent list
         keys = temp[2]
         if d[u][keys] != d_u_keys:
             continue
-        
 
         if vertexType[u][0] == 'T' and int(vertexType[u][1]) == agent_index:
             path = _tracePath2(prevEdge, g, agent_index, u, keys)
             break
-
         
         for i, edge in enumerate(g[u]):
             if vertexType[edge[0]][0] == 'D':
@@ -193,7 +193,6 @@ def findPath(g, vertexType, agent_index): #g = adjacent list
             if vertexType[edge[0]][0] == 'K':
                 newKeys |= 1 << (int(vertexType[edge[0]][1]) - 1)
             
-
             if d[edge[0]][newKeys] <= d_u_keys + len(edge[1]):
                 continue
 
