@@ -159,7 +159,7 @@ def _tracePath2(prevEdge, g, agent_index, u, keys):
         nodes.append(u)
 
     nodes.reverse()
-    return path, nodes
+    return path#, nodes
 
 
 #find a path from a selected agent to its target
