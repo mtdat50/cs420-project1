@@ -9,6 +9,7 @@ from Camera import CameraGroup
 import copy
 import sys
 
+
 def play_path(map, path, displayMaps, agentCoord, cur_step_idx):
     agent1Coord = [agentCoord[0][1], agentCoord[0][2] , agentCoord[0][3]]
     step = path[cur_step_idx]
