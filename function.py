@@ -182,7 +182,7 @@ def findPath(g, vertexType, agent_index): #g = adjacent list
         if d[u][keys] != d_u_keys:
             continue
 
-        if vertexType[u][0] == 'T' and int(vertexType[u][1]) == agent_index:
+        if vertexType[u][0] == 'T' and int(vertexType[u][1:]) == agent_index:
             path = _tracePath2(prevEdge, g, agent_index, u, keys)
             break
         

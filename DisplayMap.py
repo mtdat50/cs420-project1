@@ -10,7 +10,7 @@ class Node(pygame.sprite.Sprite):
         self.image = pygame.image.load('Assets/empty_cell.png').convert_alpha()
         if nodeType[0] == 'A':
             self.text_color = WHITE
-            self.bg_color = RED
+            self.bg_color = AGENT_THEME_COLOR[(int(nodeType[1:])-1) % len(AGENT_THEME_COLOR)]
         if nodeType[0] == '0':
             self.bg_color = WHITE
         if nodeType == '-1':
@@ -20,7 +20,7 @@ class Node(pygame.sprite.Sprite):
             self.text_color = YELLOW
             self.bg_color = WHITE
         if nodeType[0] == 'T':
-            self.text_color = RED
+            self.text_color = AGENT_THEME_COLOR[(int(nodeType[1:])-1) % len(AGENT_THEME_COLOR)]
             self.bg_color = WHITE
         if nodeType[0] == 'D':
             self.text_color = YELLOW
@@ -55,7 +55,7 @@ class Node(pygame.sprite.Sprite):
         self.text_color = WHITE
         if nodeType[0] == 'A':
             self.text_color = WHITE
-            self.bg_color = RED
+            self.bg_color = AGENT_THEME_COLOR[(int(nodeType[1:])-1) % len(AGENT_THEME_COLOR)]
         if nodeType[0] == '0':
             self.bg_color = WHITE
         if nodeType == '-1':
@@ -65,7 +65,7 @@ class Node(pygame.sprite.Sprite):
             self.text_color = YELLOW
             self.bg_color = WHITE
         if nodeType[0] == 'T':
-            self.text_color = RED
+            self.text_color = AGENT_THEME_COLOR[(int(nodeType[1:])-1) % len(AGENT_THEME_COLOR)]
             self.bg_color = WHITE
         if nodeType[0] == 'D':
             self.text_color = YELLOW
