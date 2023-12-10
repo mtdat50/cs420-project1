@@ -73,18 +73,19 @@ def main():
     map_surface.fill(GREY)
 
     menu = Menu()
-    play_button = Button(menu.rect.left+50, menu.rect.top+50, "Play", menu, 'Assets/orange_button.png', is_text_button=True)
-    pause_button = Button(menu.rect.left+50, menu.rect.top+130, "Pause", menu, 'Assets/orange_button.png', is_text_button=True)
-    reset_button = Button(menu.rect.left+50, menu.rect.top+210, "Reset", menu, 'Assets/orange_button.png', is_text_button=True)
+    play_button = Button(menu.rect.left+50, menu.rect.top+200, "Play", menu, 'Assets/orange_button.png', is_text_button=True)
+    pause_button = Button(menu.rect.left+50, menu.rect.top+260, "Pause", menu, 'Assets/orange_button.png', is_text_button=True)
+    reset_button = Button(menu.rect.left+50, menu.rect.top+320, "Reset", menu, 'Assets/orange_button.png', is_text_button=True)
 
 
-    camera_group = CameraGroup(map_surface)
+    camera_groups: list[CameraGroup] = []
     # camera_group = pygame.sprite.Group()
 
     # Map setups
     displayMaps: list[DisplayMap] = []
     for i in range(f):
-        displayMaps.append(DisplayMap(map[i], camera_group))
+        camera_groups.append(CameraGroup(map_surface))
+        displayMaps.append(DisplayMap(map[i], camera_groups[i]))
 
 
     path = findPath(g, vertexType, agent_index = 1)
@@ -104,11 +105,11 @@ def main():
                 exit()
 
             if event.type == pygame.MOUSEWHEEL:
-                camera_group.zoom_scale += event.y * 0.06
-                if event.y < 0 and camera_group.zoom_scale < 0.3:
-                    camera_group.zoom_scale = 0.3
-                if event.y > 0 and camera_group.zoom_scale > 1.3:
-                    camera_group.zoom_scale = 1.3
+                camera_groups[agentCoord[0][1]].zoom_scale += event.y * 0.06
+                if event.y < 0 and camera_groups[agentCoord[0][1]].zoom_scale < 0.3:
+                    camera_groups[agentCoord[0][1]].zoom_scale = 0.3
+                if event.y > 0 and camera_groups[agentCoord[0][1]].zoom_scale > 1.3:
+                    camera_groups[agentCoord[0][1]].zoom_scale = 1.3
             
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if (event.button == 1):
@@ -121,20 +122,20 @@ def main():
                         cur_step_idx = 0
                         agentCoord = copy.deepcopy(agentCoordBU)
 
-                        camera_group.empty()
+                        camera_groups[agentCoord[0][1]].empty()
                         displayMaps: list[DisplayMap] = []
                         for i in range(f):
-                            displayMaps.append(DisplayMap(map[i], camera_group))
+                            displayMaps.append(DisplayMap(map[i], camera_groups[i]))
         
 
 
         if is_playing and cur_step_idx < n_steps:
             play_path(map, path, displayMaps, agentCoord, cur_step_idx)
             cur_step_idx += 1
-            camera_group.update()
+            camera_groups[agentCoord[0][1]].update()
 
         # camera_group.update()
-        camera_group.custom_draw(map_surface)
+        camera_groups[agentCoord[0][1]].custom_draw(map_surface)
         # camera_group.draw(map_surface)
 
         menu.update(pygame.mouse.get_pos())
