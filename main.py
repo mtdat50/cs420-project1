@@ -10,39 +10,39 @@ import copy
 import sys
 
 
-def play_path(map, path, displayMaps, agentCoord, cur_step_idx):
-    agent1Coord = [agentCoord[0][1], agentCoord[0][2] , agentCoord[0][3]]
+def play_path(map, path, displayMaps, agentCoord, agent_idx, cur_step_idx):
+    cur_agentCoord = [agentCoord[agent_idx][1], agentCoord[agent_idx][2] , agentCoord[agent_idx][3]]
     step = path[cur_step_idx]
 
-    cur_floor = agent1Coord[0]
+    cur_floor = cur_agentCoord[0]
     cur_floor_n_rows = displayMaps[cur_floor].n_row
     cur_floor_n_cols = displayMaps[cur_floor].n_col
     
-    cur_row = agent1Coord[1]
-    cur_col = agent1Coord[2]
-    cur_cell_id = cur_row*cur_floor_n_cols + cur_col
+    cur_row = cur_agentCoord[1]
+    cur_col = cur_agentCoord[2]
+
+    cur_agentCoord[1] += step[0]
+    cur_agentCoord[2] += step[1]
+    
+    # Collision resolve
+    # if displayMaps[cur_floor].grid[Node.get_node_id(cur_agentCoord[2], cur_agentCoord[1], cur_floor_n_cols)].nodeType[0] == 'A':
+    #     print("Collision!")
+    #     return False
 
     displayMaps[cur_floor].grid[Node.get_node_id(cur_col, cur_row, cur_floor_n_cols)].update_node_type('0')
 
-    agent1Coord[1] += step[0]
-    agent1Coord[2] += step[1]
+    if map[cur_agentCoord[0]][cur_agentCoord[1]][cur_agentCoord[2]] == 'UP':
+        cur_agentCoord[0] += 1
+    elif map[cur_agentCoord[0]][cur_agentCoord[1]][cur_agentCoord[2]] == 'DO':
+        cur_agentCoord[0] -= 1
 
-    if map[agent1Coord[0]][agent1Coord[1]][agent1Coord[2]] == 'UP':
-        agent1Coord[0] += 1
-    elif map[agent1Coord[0]][agent1Coord[1]][agent1Coord[2]] == 'DO':
-        agent1Coord[0] -= 1
-
-    cur_row = agent1Coord[1]
-    cur_col = agent1Coord[2]
+    cur_row = cur_agentCoord[1]
+    cur_col = cur_agentCoord[2]
     cur_cell_id = cur_row*cur_floor_n_cols + cur_col
-    displayMaps[cur_floor].grid[Node.get_node_id(cur_col, cur_row, cur_floor_n_cols)].update_node_type('A1')
+    displayMaps[cur_floor].grid[Node.get_node_id(cur_col, cur_row, cur_floor_n_cols)].update_node_type('A' + str(agent_idx+1))
     
-    # print(step, agent1Coord)
-    # if map[agent1Coord[0]][agent1Coord[1]][agent1Coord[2]] != '0':
-    #     print(map[agent1Coord[0]][agent1Coord[1]][agent1Coord[2]])
-    
-    agentCoord[0] = (agentCoord[0][0], agent1Coord[0], agent1Coord[1], agent1Coord[2])
-    # sleep(0.25)
+    agentCoord[agent_idx] = (agentCoord[agent_idx][0], cur_agentCoord[0], cur_agentCoord[1], cur_agentCoord[2])
+    return True
     
 
 def main():
@@ -88,15 +88,20 @@ def main():
         displayMaps.append(DisplayMap(map[i], camera_groups[i]))
 
 
-    path = findPath(g, vertexType, agent_index = 1)
+    paths = []
 
     # Backups
     agentCoordBU = copy.deepcopy(agentCoord)
 
     # Flags
     is_playing: bool = False
-    cur_step_idx = 0
-    n_steps = len(path)
+    cur_step_idices = [0 for _ in range(len(agentCoord))]
+    n_steps = [0 for _ in range(len(agentCoord))]
+
+    # Find paths
+    for i in range(len(agentCoord)):
+        paths.append(findPath(g, vertexType, agent_index = i+1))
+        n_steps[i] = len(paths[i])
 
     while True:
         clock.tick(60)
@@ -119,20 +124,24 @@ def main():
                         is_playing = False
                     if reset_button.checkForInput(pygame.mouse.get_pos()):
                         is_playing = False
-                        cur_step_idx = 0
+                        cur_step_idices = [0 for _ in range(len(agentCoord))]
                         agentCoord = copy.deepcopy(agentCoordBU)
 
-                        camera_groups[agentCoord[0][1]].empty()
+                        for cg in camera_groups:
+                            cg.empty()
+                        # camera_groups[agentCoord[0][1]].empty()
                         displayMaps: list[DisplayMap] = []
                         for i in range(f):
-                            displayMaps.append(DisplayMap(map[i], camera_groups[i]))
-        
+                            displayMaps.append(DisplayMap(map[i], camera_groups[i]))                        
+                            
 
-
-        if is_playing and cur_step_idx < n_steps:
-            play_path(map, path, displayMaps, agentCoord, cur_step_idx)
-            cur_step_idx += 1
-            camera_groups[agentCoord[0][1]].update()
+        if is_playing:
+            for agent_idx in range(len(agentCoord)):
+                if cur_step_idices[agent_idx] < n_steps[agent_idx]:
+                    if play_path(map, paths[agent_idx], displayMaps, agentCoord, agent_idx, cur_step_idices[agent_idx]):
+                        cur_step_idices[agent_idx] += 1
+                        camera_groups[agentCoord[agent_idx][1]].update()
+                pygame.time.delay(200)
 
         # camera_group.update()
         camera_groups[agentCoord[0][1]].custom_draw(map_surface)

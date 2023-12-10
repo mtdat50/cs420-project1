@@ -6,7 +6,7 @@ class Button(pygame.sprite.Sprite):
 	def __init__(self, x_pos, y_pos, button_text, group, image_path, is_text_button):
 		super().__init__(group)
 		self.image = pygame.image.load(image_path).convert_alpha()
-		self.image = pygame.transform.scale(self.image, (150, 50))
+		self.image = pygame.transform.scale(self.image, (210, 50))
 		self.x_pos = x_pos
 		self.y_pos = y_pos
 		self.rect = self.image.get_rect(center=(self.x_pos, self.y_pos))
