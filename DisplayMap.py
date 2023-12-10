@@ -7,29 +7,30 @@ class Node(pygame.sprite.Sprite):
         super().__init__(group)
         self.nodeType = nodeType
         self.text_color = WHITE
+        self.image = pygame.image.load('Assets/empty_cell.png').convert_alpha()
         if nodeType[0] == 'A':
-            self.image = pygame.image.load('Assets/empty_cell.png').convert_alpha()
             self.text_color = WHITE
             self.bg_color = RED
         if nodeType[0] == '0':
-            self.image = pygame.image.load('Assets/empty_cell.png').convert_alpha()
             self.bg_color = WHITE
         if nodeType == '-1':
-            self.image = pygame.image.load('Assets/empty_cell.png').convert_alpha()
             self.text_color = GREY
             self.bg_color = BLACK
         if nodeType[0] == 'K':
-            self.image = pygame.image.load('Assets/empty_cell.png').convert_alpha()
             self.text_color = YELLOW
             self.bg_color = WHITE
         if nodeType[0] == 'T':
-            self.image = pygame.image.load('Assets/empty_cell.png').convert_alpha()
             self.text_color = RED
             self.bg_color = WHITE
         if nodeType[0] == 'D':
-            self.image = pygame.image.load('Assets/empty_cell.png').convert_alpha()
             self.text_color = YELLOW
             self.bg_color = BLACK
+        if nodeType == 'UP':
+            self.text_color = BLACK
+            self.bg_color = WHITE
+        if nodeType == 'DO':
+            self.text_color = BLACK
+            self.bg_color = WHITE
 
         self.rect = self.image.get_rect(topleft = pos)
         colorImage = pygame.Surface(self.image.get_size()).convert_alpha()

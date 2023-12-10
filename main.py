@@ -87,7 +87,7 @@ def main():
         displayMaps.append(DisplayMap(map[i], camera_group))
 
 
-    path, nodes = findPath(g, vertexType, agent_index = 1)
+    path = findPath(g, vertexType, agent_index = 1)
 
     # Backups
     agentCoordBU = copy.deepcopy(agentCoord)
