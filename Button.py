@@ -22,12 +22,11 @@ class Button(pygame.sprite.Sprite):
 
 	def update(self, position):
 		# sur.blit(self.image, self.rect)
-
-		self.onHoverChange(position)
-
-		W = self.textSurf.get_width()
-		H = self.textSurf.get_height()
-		self.image.blit(self.textSurf, [self.rect.width/2 - W/2, self.rect.height/2 - H/2])
+		if self.is_text_button:
+			self.onHoverChange(position)
+			W = self.textSurf.get_width()
+			H = self.textSurf.get_height()
+			self.image.blit(self.textSurf, [self.rect.width/2 - W/2, self.rect.height/2 - H/2])
 
 	def checkForInput(self, position):
 		if position[0] in range(self.rect.left, self.rect.right) and position[1] in range(self.rect.top, self.rect.bottom):
@@ -36,7 +35,8 @@ class Button(pygame.sprite.Sprite):
 		return False
 
 	def onHoverChange(self, position):
-		if position[0] in range(self.rect.left, self.rect.right) and position[1] in range(self.rect.top, self.rect.bottom):
-			self.textSurf = self.font.render(self.button_text, True, "green")
-		else:
-			self.textSurf = self.font.render(self.button_text, True, "white")
+		if self.is_text_button:
+			if position[0] in range(self.rect.left, self.rect.right) and position[1] in range(self.rect.top, self.rect.bottom):
+				self.textSurf = self.font.render(self.button_text, True, "green")
+			else:
+				self.textSurf = self.font.render(self.button_text, True, "white")

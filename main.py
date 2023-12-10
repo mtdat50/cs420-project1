@@ -8,6 +8,16 @@ from Button import Button
 from Camera import CameraGroup
 import copy
 import sys
+import tkinter
+import tkinter.filedialog
+
+def prompt_file():
+    """Create a Tk file dialog and cleanup when finished"""
+    top = tkinter.Tk()
+    top.withdraw()  # hide window
+    file_name = tkinter.filedialog.askopenfilename(parent=top)
+    top.destroy()
+    return file_name
 
 
 def play_path(map, path, displayMaps, agentCoord, agent_idx, cur_step_idx):
@@ -45,11 +55,12 @@ def play_path(map, path, displayMaps, agentCoord, agent_idx, cur_step_idx):
     return True
     
 
-def main():
+def main(map_file_path):
 
     # MAP SETUPS
     # map, agentCoord = input('maxsize_map.txt')
-    map, agentCoord = input('input.txt')
+    # map, agentCoord = input('input.txt')
+    map, agentCoord = input(map_file_path)
     f = len(map)
     m = len(map[0])
     n = len(map[0][0])
@@ -76,6 +87,7 @@ def main():
     play_button = Button(menu.rect.left+50, menu.rect.top+200, "Play", menu, 'Assets/orange_button.png', is_text_button=True)
     pause_button = Button(menu.rect.left+50, menu.rect.top+260, "Pause", menu, 'Assets/orange_button.png', is_text_button=True)
     reset_button = Button(menu.rect.left+50, menu.rect.top+320, "Reset", menu, 'Assets/orange_button.png', is_text_button=True)
+    load_button = Button(menu.rect.left+50, menu.rect.top+380, "Load Map", menu, 'Assets/orange_button.png', is_text_button=True)
 
 
     camera_groups: list[CameraGroup] = []
@@ -132,16 +144,19 @@ def main():
                         # camera_groups[agentCoord[0][1]].empty()
                         displayMaps: list[DisplayMap] = []
                         for i in range(f):
-                            displayMaps.append(DisplayMap(map[i], camera_groups[i]))                        
-                            
-
+                            displayMaps.append(DisplayMap(map[i], camera_groups[i]))
+                    if load_button.checkForInput(pygame.mouse.get_pos()):
+                        f = prompt_file()
+                        main(f)
+                        return
+                                     
         if is_playing:
             for agent_idx in range(len(agentCoord)):
                 if cur_step_idices[agent_idx] < n_steps[agent_idx]:
                     if play_path(map, paths[agent_idx], displayMaps, agentCoord, agent_idx, cur_step_idices[agent_idx]):
                         cur_step_idices[agent_idx] += 1
                         camera_groups[agentCoord[agent_idx][1]].update()
-                pygame.time.delay(200)
+                pygame.time.delay(0)
 
         # camera_group.update()
         camera_groups[agentCoord[0][1]].custom_draw(map_surface)
@@ -152,4 +167,4 @@ def main():
         
         pygame.display.flip()
         
-main()
+main('input.txt')
