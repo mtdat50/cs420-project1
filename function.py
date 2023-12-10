@@ -15,7 +15,9 @@ UPLEFT = 4
 
 
 def input(filepath):
-    f = m = n = 0
+    f = 0
+    m = 0
+    n = 0
     agentCoord = []
     map = []
 
