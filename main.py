@@ -79,15 +79,21 @@ def main(map_file_path):
     clock = pygame.time.Clock()
 
     screen = pygame.display.set_mode(RESOLUTION)
-    screen.fill(BLACK)
+    screen.fill(CYAN)
     map_surface = screen.subsurface(0, 0, MAP_RES[0], RESOLUTION[1])
     map_surface.fill(GREY)
 
     menu = Menu()
-    play_button = Button(menu.rect.left+50, menu.rect.top+200, "Play", menu, 'Assets/orange_button.png', is_text_button=True)
-    pause_button = Button(menu.rect.left+50, menu.rect.top+260, "Pause", menu, 'Assets/orange_button.png', is_text_button=True)
-    reset_button = Button(menu.rect.left+50, menu.rect.top+320, "Reset", menu, 'Assets/orange_button.png', is_text_button=True)
-    load_button = Button(menu.rect.left+50, menu.rect.top+380, "Load Map", menu, 'Assets/orange_button.png', is_text_button=True)
+    cur_floor_statboard = Button(menu.rect.left+50, menu.rect.top+200, "A1's current Floor", menu, 'Assets/statistic_table.jpg', True, 500, 80)
+    A1_totalcost_statboard = Button(menu.rect.left+50, menu.rect.top+300, "A1's Total Cost: xxxxx", menu, 'Assets/statistic_table.jpg', True, 500, 80)
+    A1_cursteps_statboard = Button(menu.rect.left+50, menu.rect.top+400, "A1's Current Steps: xxxxx", menu, 'Assets/statistic_table.jpg', True, 500, 80)
+
+    play_button = Button(menu.rect.left+200, menu.rect.top+700, "Play", menu, 'Assets/orange_button.png', True, 210, 50)
+    pause_button = Button(menu.rect.left+200, menu.rect.top+760, "Pause", menu, 'Assets/orange_button.png', True, 210, 50)
+    reset_button = Button(menu.rect.left+200, menu.rect.top+820, "Reset", menu, 'Assets/orange_button.png', True, 210, 50)
+    load_button = Button(menu.rect.left+200, menu.rect.top+880, "Load Map", menu, 'Assets/orange_button.png', True, 210, 50)
+    quit_button = Button(menu.rect.left+200, menu.rect.top+940, "Quit", menu, 'Assets/orange_button.png', True, 210, 50)
+
 
 
     camera_groups: list[CameraGroup] = []
@@ -115,6 +121,9 @@ def main(map_file_path):
         paths.append(findPath(g, vertexType, agent_index = i+1))
         n_steps[i] = len(paths[i])
 
+    A1_totalcost_statboard.changeText("A1's Total Cost: " + str(len(paths[0])))
+    A1_cursteps_statboard.changeText("A1's Current Steps: 0")
+
     while True:
         clock.tick(60)
         for event in pygame.event.get():
@@ -132,8 +141,10 @@ def main(map_file_path):
                 if (event.button == 1):
                     if play_button.checkForInput(pygame.mouse.get_pos()):
                         is_playing = True
+
                     if pause_button.checkForInput(pygame.mouse.get_pos()):
                         is_playing = False
+
                     if reset_button.checkForInput(pygame.mouse.get_pos()):
                         is_playing = False
                         cur_step_idices = [0 for _ in range(len(agentCoord))]
@@ -145,10 +156,16 @@ def main(map_file_path):
                         displayMaps: list[DisplayMap] = []
                         for i in range(f):
                             displayMaps.append(DisplayMap(map[i], camera_groups[i]))
+
+                        A1_cursteps_statboard.changeText("A1's Current Steps: 0")
+
                     if load_button.checkForInput(pygame.mouse.get_pos()):
                         f = prompt_file()
                         main(f)
                         return
+                    
+                    if quit_button.checkForInput(pygame.mouse.get_pos()):
+                        exit()
                                      
         if is_playing:
             for agent_idx in range(len(agentCoord)):
@@ -156,12 +173,16 @@ def main(map_file_path):
                     if play_path(map, paths[agent_idx], displayMaps, agentCoord, agent_idx, cur_step_idices[agent_idx]):
                         cur_step_idices[agent_idx] += 1
                         camera_groups[agentCoord[agent_idx][1]].update()
+                        if agent_idx == 0:
+                            A1_cursteps_statboard.changeText("A1's Current Steps: " + str(cur_step_idices[agent_idx]))
                 pygame.time.delay(0)
 
         # camera_group.update()
         camera_groups[agentCoord[0][1]].custom_draw(map_surface)
         # camera_group.draw(map_surface)
 
+        cur_floor_statboard.changeText("A1's current Floor: " + str(agentCoord[0][1]+1))
+        
         menu.update(pygame.mouse.get_pos())
         menu.draw_menu(screen)
         

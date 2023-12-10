@@ -132,7 +132,7 @@ class CameraGroup(pygame.sprite.Group):
 		# self.mouse_control()
 		self.zoom_keyboard_control()
 
-		self.internal_surf.fill(BLACK)
+		self.internal_surf.fill(CYAN)
 
 		# active elements
 		for sprite in self.sprites():
