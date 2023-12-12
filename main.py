@@ -1,5 +1,7 @@
 import pygame
 from function import *
+from function import _checkCollision
+from function import _randomValidMove
 from time import sleep
 from DisplayMap import DisplayMap, Node
 from const import *
@@ -20,9 +22,9 @@ def prompt_file():
     return file_name
 
 
-def play_path(map, path, displayMaps, agentCoord, agent_idx, cur_step_idx):
+def play_path(map, path, displayMaps, agentCoord, agent_idx):
     cur_agentCoord = [agentCoord[agent_idx][1], agentCoord[agent_idx][2] , agentCoord[agent_idx][3]]
-    step = path[cur_step_idx]
+    step = path[0]
 
     cur_floor = cur_agentCoord[0]
     cur_floor_n_rows = displayMaps[cur_floor].n_row
@@ -31,8 +33,12 @@ def play_path(map, path, displayMaps, agentCoord, agent_idx, cur_step_idx):
     cur_row = cur_agentCoord[1]
     cur_col = cur_agentCoord[2]
 
-    cur_agentCoord[1] += step[0]
-    cur_agentCoord[2] += step[1]
+    newF = cur_floor
+    newR = cur_row + step[0]
+    newC = cur_col + step[1]
+
+    # cur_agentCoord[1] += step[0]
+    # cur_agentCoord[2] += step[1]
     
     # Collision resolve
     # if displayMaps[cur_floor].grid[Node.get_node_id(cur_agentCoord[2], cur_agentCoord[1], cur_floor_n_cols)].nodeType[0] == 'A':
@@ -41,17 +47,38 @@ def play_path(map, path, displayMaps, agentCoord, agent_idx, cur_step_idx):
 
     displayMaps[cur_floor].grid[Node.get_node_id(cur_col, cur_row, cur_floor_n_cols)].update_node_type('0')
 
-    if map[cur_agentCoord[0]][cur_agentCoord[1]][cur_agentCoord[2]] == 'UP':
-        cur_agentCoord[0] += 1
-    elif map[cur_agentCoord[0]][cur_agentCoord[1]][cur_agentCoord[2]] == 'DO':
-        cur_agentCoord[0] -= 1
-
-    cur_row = cur_agentCoord[1]
-    cur_col = cur_agentCoord[2]
-    cur_cell_id = cur_row*cur_floor_n_cols + cur_col
-    displayMaps[cur_floor].grid[Node.get_node_id(cur_col, cur_row, cur_floor_n_cols)].update_node_type('A' + str(agent_idx+1))
+    if map[cur_floor][newR][newC] == 'UP':
+        newF += 1
+    elif map[cur_floor][newR][newC] == 'DO':
+        newF -= 1
     
-    agentCoord[agent_idx] = (agentCoord[agent_idx][0], cur_agentCoord[0], cur_agentCoord[1], cur_agentCoord[2])
+    if _checkCollision(agentCoord, agent_idx, newF, newR, newC):
+        # print("=====Collision; original destination", newF, newR, newC)
+        # print("original step", step)
+        x, y = _randomValidMove(agent_idx, cur_floor, cur_row, cur_col, map, agentCoord)
+        # print("new step", x, y)
+        path.appendleft((-x, -y))
+        
+
+        newF = cur_floor
+        newR = cur_row + x
+        newC = cur_col + y    
+        if map[cur_floor][newR][newC] == 'UP':
+            newF += 1
+        elif map[cur_floor][newR][newC] == 'DO':
+            newF -= 1
+        # print("new destination", newF, newR, newC, _checkCollision(agentCoord, agent_idx, newF, newR, newC))
+    else:
+        path.popleft()
+
+
+
+    cur_row = newR
+    cur_col = newC
+    displayMaps[newF].grid[Node.get_node_id(cur_col, cur_row, cur_floor_n_cols)].update_node_type('A' + str(agent_idx+1))
+    
+    agentCoord[agent_idx] = (agentCoord[agent_idx][0], newF, newR, newC)
+    sleep(0.2)
     return True
     
 
@@ -118,7 +145,7 @@ def main(map_file_path):
 
     # Find paths
     for i in range(len(agentCoord)):
-        paths.append(findPath(g, vertexType, agent_index = i+1))
+        paths.append(deque(findPath(g, vertexType, agent_index = i+1)))
         n_steps[i] = len(paths[i])
 
     A1_totalcost_statboard.changeText("A1's Total Cost: " + str(len(paths[0])))
@@ -146,6 +173,10 @@ def main(map_file_path):
                         is_playing = False
 
                     if reset_button.checkForInput(pygame.mouse.get_pos()):
+                        paths.clear()
+                        for i in range(len(agentCoord)):
+                            paths.append(deque(findPath(g, vertexType, agent_index = i+1)))
+                            n_steps[i] = len(paths[i])
                         is_playing = False
                         cur_step_idices = [0 for _ in range(len(agentCoord))]
                         agentCoord = copy.deepcopy(agentCoordBU)
@@ -169,12 +200,17 @@ def main(map_file_path):
                                      
         if is_playing:
             for agent_idx in range(len(agentCoord)):
-                if cur_step_idices[agent_idx] < n_steps[agent_idx]:
-                    if play_path(map, paths[agent_idx], displayMaps, agentCoord, agent_idx, cur_step_idices[agent_idx]):
-                        cur_step_idices[agent_idx] += 1
-                        camera_groups[agentCoord[agent_idx][1]].update()
-                        if agent_idx == 0:
-                            A1_cursteps_statboard.changeText("A1's Current Steps: " + str(cur_step_idices[agent_idx]))
+                if play_path(map, paths[agent_idx], displayMaps, agentCoord, agent_idx):
+                    camera_groups[agentCoord[agent_idx][1]].update()
+                    cur_step_idices[agent_idx] += 1
+                    if agent_idx == 0:
+                        A1_cursteps_statboard.changeText("A1's Current Steps: " + str(cur_step_idices[agent_idx]))
+                if len(paths[agent_idx]) == 0:
+                    if agent_idx != 0:
+                        x, y = _randomValidMove(agent_idx, agentCoord[agent_idx][1], agentCoord[agent_idx][2], agentCoord[agent_idx][3], map, agentCoord)
+                        paths[agent_idx].appendleft((x, y))
+                    else:
+                        is_playing = False 
                 pygame.time.delay(0)
 
         # camera_group.update()
@@ -188,4 +224,4 @@ def main(map_file_path):
         
         pygame.display.flip()
         
-main('input.txt')
+main('input copy.txt')

@@ -1,5 +1,6 @@
 from collections import deque
 from queue import PriorityQueue
+import random
 
 UP = 0
 RIGHT = 1
@@ -39,8 +40,12 @@ def input(filepath):
         for k in range(f):
             filein.readline()
             for i in range(m):
-                map[k][i] = filein.readline()[:-1].split(',')
+                line = filein.readline()
+                if line[-1] == '\n':
+                    line = line[:-1]
+                map[k][i] = line.split(',')
                 for j in range(len(map[0][0])):
+                    print(k, i, j)
                     if map[k][i][j][0] == 'A':
                         agentCoord.append((map[k][i][j], k, i, j))
 
@@ -48,11 +53,6 @@ def input(filepath):
     agentCoord.sort(key=lambda tup: tup[0])
                     
     return map, agentCoord
-
-
-#draw the floor where agent A1 is on
-def output(map, agents_coord): #list of agents' current position, [][1] = floor, [][2] = row, [][3] = column
-    TODO
 
 
 def _tracePath(steppingTrack, r, c, sourceR, sourceS):
@@ -65,6 +65,48 @@ def _tracePath(steppingTrack, r, c, sourceR, sourceS):
     
     path.reverse()
     return path
+
+def _checkCollision(agentCoord, agentIndex, f, r, c):
+    for i, agent in enumerate(agentCoord):
+        if i == agentIndex:
+            continue
+
+        if f == agent[1] and r == agent[2] and c == agent[3]:
+            return True
+    return False
+
+
+def _randomValidMove(agentIndex, curF, curR, curC, map, agentCoord):
+    m = len(map[0])
+    n = len(map[0][0])
+    validStep = []
+
+    for i in range(-1, 2):
+        newR = curR + i
+        if newR < 0 or newR >= m:
+            continue
+
+        for j in range(-1, 2):
+            if i == 0 and j == 0:
+                continue
+            newC = curC + j
+
+            if newC < 0 or newC >= n or map[curF][newR][newC] == '-1':
+                continue
+            if i != 0 and j != 0 and (map[curF][curR][newC] == '-1' or map[curF][newR][curC] == '-1'):
+                continue
+
+            newF = curF
+            if map[curF][newR][newC] == 'UP':
+                newF += 1
+            elif map[curF][newR][newC] == 'DO':
+                newF -= 1
+
+            if _checkCollision(agentCoord, agentIndex, newF, newR, newC):
+                continue
+            validStep.append((i, j))
+    choosenStep = random.choice(validStep)
+    return choosenStep[0], choosenStep[1]
 
 
 #convert matrix to graph, vertices are objects on the map, edges are paths between objects
@@ -82,6 +124,7 @@ def convert2Graph(map, agentCoord):
     f = len(map)
     m = len(map[0])
     n = len(map[0][0])
+    print(f, m, n)
     for k in range(f):
         for i in range(m):
             for j in range(n):
