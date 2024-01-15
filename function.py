@@ -44,8 +44,10 @@ def input(filepath):
                 if line[-1] == '\n':
                     line = line[:-1]
                 map[k][i] = line.split(',')
-                for j in range(len(map[0][0])):
-                    print(k, i, j)
+                # print(len(map[k][i]))
+                # print(map[k][i])
+                for j in range(n):
+                    # print(k, i, j)
                     if map[k][i][j][0] == 'A':
                         agentCoord.append((map[k][i][j], k, i, j))
 
@@ -230,7 +232,7 @@ def findPath(g, vertexType, agent_index): #g = adjacent list
             break
         
         for i, edge in enumerate(g[u]):
-            if vertexType[edge[0]][0] == 'D':
+            if vertexType[edge[0]] != 'DO' and vertexType[edge[0]][0] == 'D':
                 if (keys >> (int(vertexType[edge[0]][1]) - 1)) & 1 == 0:
                     continue
 
